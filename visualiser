@@ -1,0 +1,152 @@
+import streamlit as st
+import numpy as np
+import plotly.graph_objects as go
+
+st.set_page_config(
+    page_title="Machine Motion Visualizer",
+    layout="wide"
+)
+
+st.title("🔧 Machine Motion Visualizer")
+
+st.markdown("""
+Visualiseer hoe trillingen zich gedragen bij verschillende frequenties.
+
+**Belangrijk:**
+- Lage frequentie = grote zichtbare beweging
+- Hoge frequentie = nauwelijks zichtbaar
+- Hoge frequentie veroorzaakt vaak hoge versnellingen
+""")
+
+# --------------------------------------------------
+# INPUTS
+# --------------------------------------------------
+
+col1, col2 = st.columns(2)
+
+with col1:
+
+    freq = st.slider(
+        "Frequentie (Hz)",
+        1,
+        5000,
+        25
+    )
+
+with col2:
+
+    disp_um = st.slider(
+        "Verplaatsing (μm)",
+        1,
+        500,
+        50
+    )
+
+# --------------------------------------------------
+# BEREKENINGEN
+# --------------------------------------------------
+
+disp_m = disp_um * 1e-6
+
+velocity_mm_s = (
+    2 * np.pi * freq * disp_m
+) * 1000
+
+acceleration_ms2 = (
+    (2 * np.pi * freq) ** 2
+    * disp_m
+)
+
+acceleration_g = (
+    acceleration_ms2 / 9.81
+)
+
+# --------------------------------------------------
+# METRICS
+# --------------------------------------------------
+
+c1, c2, c3 = st.columns(3)
+
+c1.metric(
+    "Verplaatsing",
+    f"{disp_um:.0f} μm"
+)
+
+c2.metric(
+    "Snelheid",
+    f"{velocity_mm_s:.2f} mm/s"
+)
+
+c3.metric(
+    "Versnelling",
+    f"{acceleration_g:.2f} g"
+)
+
+# --------------------------------------------------
+# MACHINE VISUALISATIE
+# --------------------------------------------------
+
+st.header("🏭 Machinegedrag")
+
+machine_scale = max(
+    0.5,
+    min(20, disp_um / 20)
+)
+
+machine_x = [
+    -2,
+    2,
+    2,
+    -2,
+    -2
+]
+
+machine_y = [
+    -1,
+    -1,
+    1,
+    1,
+    -1
+]
+
+fig_machine = go.Figure()
+
+fig_machine.add_trace(
+    go.Scatter(
+        x=machine_x,
+        y=machine_y,
+        fill="toself",
+        mode="lines",
+        name="Machine"
+    )
+)
+
+fig_machine.update_layout(
+    title="Machine (uitslag indicatie)",
+    xaxis=dict(
+        range=[-10,10]
+    ),
+    yaxis=dict(
+        range=[-5,5]
+    ),
+    height=350
+)
+
+st.plotly_chart(
+    fig_machine,
+    use_container_width=True
+)
+
+# --------------------------------------------------
+# GOLFVORM
+# --------------------------------------------------
+
+st.header("📈 Trillingsgolf")
+
+t = np.linspace(
+    0,
+    1,
+    3000
+)
+
+y
